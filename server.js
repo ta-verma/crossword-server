@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://https://cross-quest.herokuapp.com/"],
+    origin: ["https://cross-quest.herokuapp.com"],
     methods: ["GET", "POST"],
     credentials: true
 }));
