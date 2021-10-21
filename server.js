@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["http://localhost:3000"],
+    origin: ["https://cross-quest.herokuapp.com"],
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -81,7 +81,9 @@ app.post('/signup', (req, res) => {
         "SELECT * FROM users WHERE username = ?;",
         username,
         (err, result) => {
-            if (result.length > 0) {
+            // console.log(err)
+            // console.log(result)
+            if (result[0].length>0) {
                 res.send({ message: "username already exists" })
             }
             else {
@@ -89,8 +91,9 @@ app.post('/signup', (req, res) => {
                     "SELECT * FROM users WHERE email = ?;",
                     email,
                     (err, result) => {
-                        if (result.length > 0) {
-                            res.send({ message: "email already exists" })
+                        console.log(err)
+                        if (result[0].length>0) {
+                            res.send({ message: "email already registered" })
                         }
                         else {
                             bcrypt.hash(password, saltRounds, (err, hash) => {
@@ -130,7 +133,7 @@ app.post('/signin', (req, res) => {
                 res.send({ err: err })
             }
 
-            if (result.length > 0) {
+            if (result[0].length > 0) {
                 // console.log(result)
                 bcrypt.compare(password, result[0].password, (error, response) => {
                     if (response) {
