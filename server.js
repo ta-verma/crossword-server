@@ -51,6 +51,23 @@ app.post('/oauthsignup', (req, res)=>{
     res.send({loggedIn : "true"})
 })
 
+app.post('/contact', (req, res)=>{
+    const name = req.body.name
+    const email = req.body.email
+    const message = req.body.message
+
+
+    db.query(
+        "INSERT INTO contact (name, email, message) VALUES(?, ?, ?)",
+        [name, email, message],
+        (err, result) => {
+            if(err)
+            res.send({message : "Something went wrong."})
+        }
+    )
+    res.send({message : "ok"})
+})
+
 
 app.post('/signup', (req, res) => {
 
