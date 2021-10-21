@@ -34,14 +34,16 @@ const db = mysql.createConnection({
     database: "sql6445547"
 });
 
-app.post('/googlesignup', (req, res)=>{
-    const googleId = req.body.googleId
+app.post('/oauthsignup', (req, res)=>{
+    const id = req.body.id
     const name = req.body.name
     const email = req.body.email
+    const oauth = req.body.oauth
+    const object = req.body.object
 
     db.query(
-        "INSERT INTO google_user (googleId, name, email) VALUES(?, ?, ?)",
-        [googleId, name, email],
+        "INSERT INTO oauth_users (id, name, email, oauth, object) VALUES(?, ?, ?, ?, ?)",
+        [id, name, email, oauth, object],
         (err, result) => {
             console.log(err)
         }
