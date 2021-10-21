@@ -46,6 +46,7 @@ app.post('/googlesignup', (req, res)=>{
             console.log(err)
         }
     )
+    res.send({loggedIn : "true"})
 })
 
 
