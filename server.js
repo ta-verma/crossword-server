@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://cross-quest.herokuapp.com"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -34,6 +34,21 @@ const db = mysql.createConnection({
     database: "sql6445547"
 });
 
+app.post('/googlesignup', (req, res)=>{
+    const googleId = req.body.googleId
+    const name = req.body.name
+    const email = req.body.email
+
+    db.query(
+        "INSERT INTO google_user (googleId, name, email) VALUES(?, ?, ?)",
+        [googleId, name, email],
+        (err, result) => {
+            console.log(err)
+        }
+    )
+})
+
+
 app.post('/signup', (req, res) => {
 
     // db.connect()
@@ -41,19 +56,43 @@ app.post('/signup', (req, res) => {
     const username = req.body.username
     const password = req.body.password
     const email = req.body.email
-    bcrypt.hash(password, saltRounds, (err, hash) => {
-        if (err) {
-            console.log(err)
-        }
-        db.query(
-            "INSERT INTO users (username, name, email, password) VALUES(?, ?, ?, ?)",
-            [username,user, email, hash],
-            (err, result) => {
-                console.log(err);
+    // var alreadyExists = false
+    db.query(
+        "SELECT * FROM users WHERE username = ?;",
+        username,
+        (err, result) => {
+            if (result.length > 0) {
+                res.send({ message: "username already exists" })
             }
-        )
-    })
-    res.send({message: "Account Created Successfully !"})
+            else {
+                db.query(
+                    "SELECT * FROM users WHERE email = ?;",
+                    email,
+                    (err, result) => {
+                        if (result.length > 0) {
+                            res.send({ message: "email already exists" })
+                        }
+                        else {
+                            bcrypt.hash(password, saltRounds, (err, hash) => {
+                                if (err) {
+                                    console.log(err)
+                                }
+                                db.query(
+                                    "INSERT INTO users (username, name, email, password) VALUES(?, ?, ?, ?)",
+                                    [username, user, email, hash],
+                                    (err, result) => {
+                                        console.log(err);
+                                    }
+                                )
+                            })
+                        }
+                    }
+                )
+            }
+        }
+    )
+
+    res.send({ message: "ok" })
 })
 
 app.post('/signin', (req, res) => {
