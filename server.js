@@ -7,7 +7,6 @@ const session = require("express-session")
 
 const saltRounds = 10
 
-
 const app = express();
 
 app.use(express.json());
@@ -16,6 +15,8 @@ app.use(cors({
     methods: ["GET", "POST"],
     credentials: true
 }));
+
+
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
@@ -27,6 +28,8 @@ app.use(session({
         expires: 60 * 60 * 24,
     },
 }))
+
+
 const db = mysql.createConnection({
     user: "sql6445547",
     host: "sql6.freesqldatabase.com",
@@ -34,7 +37,7 @@ const db = mysql.createConnection({
     database: "sql6445547"
 });
 
-app.post('/oauthsignup', (req, res)=>{
+app.post('/oauthsignup', (req, res) => {
     const id = req.body.id
     const name = req.body.name
     const email = req.body.email
@@ -48,10 +51,10 @@ app.post('/oauthsignup', (req, res)=>{
             console.log(err)
         }
     )
-    res.send({loggedIn : "true"})
+    res.send({ loggedIn: "true" })
 })
 
-app.post('/contact', (req, res)=>{
+app.post('/contact', (req, res) => {
     const name = req.body.name
     const email = req.body.email
     const message = req.body.message
@@ -61,11 +64,13 @@ app.post('/contact', (req, res)=>{
         "INSERT INTO contact (name, email, message) VALUES(?, ?, ?)",
         [name, email, message],
         (err, result) => {
-            if(err)
-            res.send({message : "Something went wrong."})
+            if (err)
+                res.send({ message: "Something went wrong." })
+            else
+                res.send({ message: "ok" })
         }
     )
-    res.send({message : "ok"})
+
 })
 
 
@@ -76,26 +81,21 @@ app.post('/signup', (req, res) => {
     const username = req.body.username
     const password = req.body.password
     const email = req.body.email
-    // var alreadyExists = false
+    var isExists = false
+    var isMail = false
+    var isUser = false
+
+
     db.query(
         "SELECT * FROM users WHERE username = ?;",
         username,
         (err, result) => {
-            // console.log(err)
-            // console.log(result)
-            if (result[0].length>0) {
-                res.send({ message: "username already exists" })
-            }
-            else {
+            if (result.length === 0) {
                 db.query(
                     "SELECT * FROM users WHERE email = ?;",
                     email,
                     (err, result) => {
-                        console.log(err)
-                        if (result[0].length>0) {
-                            res.send({ message: "email already registered" })
-                        }
-                        else {
+                        if (result.length === 0) {
                             bcrypt.hash(password, saltRounds, (err, hash) => {
                                 if (err) {
                                     console.log(err)
@@ -108,15 +108,20 @@ app.post('/signup', (req, res) => {
                                     }
                                 )
                             })
+                            res.send({ message: "ok" })
+                        }
+                        else {
+                            res.send({ message: "email already exists" })
                         }
                     }
                 )
+            } else {
+                res.send({ message: "username already exists" })
             }
         }
     )
-
-    res.send({ message: "ok" })
 })
+
 
 app.post('/signin', (req, res) => {
     // db.connect()
@@ -132,8 +137,8 @@ app.post('/signin', (req, res) => {
             if (err) {
                 res.send({ err: err })
             }
-
-            if (result[0].length > 0) {
+            // console.log(result)
+            if (result.length > 0) {
                 // console.log(result)
                 bcrypt.compare(password, result[0].password, (error, response) => {
                     if (response) {
