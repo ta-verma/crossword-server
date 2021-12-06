@@ -3,7 +3,8 @@ const mysql = require("mysql");
 const cors = require("cors")
 const bcrypt = require("bcrypt")
 const cookieParser = require("cookie-parser")
-const session = require("express-session")
+const session = require("express-session");
+const crossword = require("./create");
 
 const saltRounds = 10
 
@@ -11,7 +12,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://cross-quest.herokuapp.com"],
+    origin: ["https://cross-quest.herokuapp.com",
+        "http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -21,7 +23,7 @@ app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     key: "userId",
-    secret: "sample",
+    secret: "crossword",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -73,6 +75,50 @@ app.post('/contact', (req, res) => {
 
 })
 
+app.post('/save', (req, res) => {
+    const recdata = req.body.data
+    const data = JSON.stringify(recdata)
+    db.query(
+        "SELECT * FROM public_crosswords WHERE crossword = ?",
+        [data],
+        (err, result) => {
+            if (err)
+                res.send({ message: "Something went wrong.1" })
+            else if (result.length === 0) {
+                db.query(                 
+                    `INSERT INTO public_crosswords (crossword) VALUES(?);`,
+                    [data],
+                    (err, result) => {
+                        if (err){
+                            console.log(err)
+                            res.send({ message: "Something went wrong." })
+                        }
+                        else
+                            res.send({ message: "ok", id: result.insertId })
+                    }
+                )
+            }
+            else {
+                res.send({ message: "ok", id: result[0].id })
+            }
+
+        }
+    )
+})
+
+app.get("/getCrossword", (req, res) => {
+    const id = req.query.id
+    db.query(
+        "SELECT * FROM public_crosswords WHERE id = ?",
+        [id],
+        (err, result) => {
+            if (err)
+                res.send({ message: "Something went wrong." })
+            else
+                res.send({ message: "ok", data: JSON.parse(result[0].crossword) })
+        })
+})
+
 
 app.post('/signup', (req, res) => {
 
@@ -81,10 +127,6 @@ app.post('/signup', (req, res) => {
     const username = req.body.username
     const password = req.body.password
     const email = req.body.email
-    var isExists = false
-    var isMail = false
-    var isUser = false
-
 
     db.query(
         "SELECT * FROM users WHERE username = ?;",
@@ -124,11 +166,8 @@ app.post('/signup', (req, res) => {
 
 
 app.post('/signin', (req, res) => {
-    // db.connect()
-    // const user = req.body.user
     const username = req.body.username
     const password = req.body.password
-    // const email = req.body.email
 
     db.query(
         "SELECT * FROM users WHERE username = ?;",
@@ -137,13 +176,12 @@ app.post('/signin', (req, res) => {
             if (err) {
                 res.send({ err: err })
             }
-            // console.log(result)
             if (result.length > 0) {
-                // console.log(result)
                 bcrypt.compare(password, result[0].password, (error, response) => {
+                    if(error)
+                        console.log(error)
                     if (response) {
                         req.session.user = result;
-                        // console.log(req.session.user)
                         res.send(result)
                     }
                     else {
@@ -170,6 +208,28 @@ app.get("/signin", (req, res) => {
     }
 });
 
+app.post("/generate", (req, res) => {
+    const wordList = req.body.wordList
+    // console.log(wordList)
+    if (wordList.length > 0) {
+        const result = crossword.Crossword(wordList)
+        // console.log(result)
+        res.send({ result: result })
+    }
+})
+
+app.get("/generate", (req, res) => {
+    const result = crossword.Crossword()
+    res.send({ result: result })
+})
+
+// logout route
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.send({ loggedIn: false });
+});
+
 app.listen(process.env.PORT || 3001, () => {
     console.log("Server is Online ");
 })
+
