@@ -21,15 +21,28 @@ app.use(cors({
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 
+// app.use(session({
+//     key: "userId",
+//     secret: "crossword",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//         expires: 60 * 60 * 24,
+//     },
+// }))
+
 app.use(session({
-    key: "userId",
-    secret: "crossword",
+    name: "userId",
+    secret: "yryGGeugidx34otGDuSF5sD9R8g0Gü3r8",
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-        expires: 60 * 60 * 24,
-    },
-}))
+        path: "/",
+        secure: true,
+        //domain: ".herokuapp.com", REMOVE THIS HELPED ME (I dont use a domain anymore)
+        httpOnly: true
+    }
+}));
 
 
 const db = mysql.createConnection({
