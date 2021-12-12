@@ -35,6 +35,7 @@ app.use(session({
     name: "userId",
     secret: "yryGGeugidx34otGDuSF5sD9R8g0Gü3r8",
     resave: false,
+    proxy:true,
     saveUninitialized: true,
     cookie: {
         path: "/",
