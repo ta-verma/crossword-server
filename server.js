@@ -12,8 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://cross-quest.herokuapp.com",
-        "http://localhost:3000"],
+    origin: ["https://cross-quest.herokuapp.com", "http://localhost:3000"],
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -21,6 +20,7 @@ app.use(cors({
 
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
+
 app.use(session({
     key: "userId",
     secret: "crossword",
@@ -85,11 +85,11 @@ app.post('/save', (req, res) => {
             if (err)
                 res.send({ message: "Something went wrong.1" })
             else if (result.length === 0) {
-                db.query(                 
+                db.query(
                     `INSERT INTO public_crosswords (crossword) VALUES(?);`,
                     [data],
                     (err, result) => {
-                        if (err){
+                        if (err) {
                             console.log(err)
                             res.send({ message: "Something went wrong." })
                         }
@@ -102,6 +102,22 @@ app.post('/save', (req, res) => {
                 res.send({ message: "ok", id: result[0].id })
             }
 
+        }
+    )
+})
+
+app.post('/togglePrivacy', (req, res) => {
+    const id = req.body.id
+    const privacy = req.body.privacy
+    // console.log(id, privacy)
+    db.query(
+        `UPDATE private_crosswords SET privacy = ? WHERE id = ?`,
+        [privacy, id],
+        (err, result) => {
+            if (err)
+                res.send({ message: "Something went wrong." })
+            else
+                res.send({ message: "changed" })
         }
     )
 })
@@ -164,6 +180,61 @@ app.post('/signup', (req, res) => {
     )
 })
 
+app.post('/updateProfile', (req, res) => {
+    const name = req.body.name;
+    const username = req.body.username;
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if (name === "" || username === "" || email === "" || password === "") {
+        res.send({ message: "Please fill in all fields." })
+    }
+    else {
+        db.query(
+            "SELECT * FROM users WHERE username != ? AND email = ?;",
+            [username, email],
+            (err, result) => {
+                if (result.length === 0) {
+                    db.query(
+                        "SELECT * FROM users WHERE username = ? ",
+                        username,
+                        (err, result) => {
+                            if (result) {
+                                bcrypt.compare(password, result[0].password, (err, result) => {
+                                    if (err)
+                                        res.send({ message: "Something went wrong." })
+                                    if (result) {
+                                        db.query(
+                                            "UPDATE users SET name = ?, email = ? WHERE username = ?;",
+                                            [name, email, username],
+                                            (err, result) => {
+                                                if (err) {
+                                                    res.send({ message: "Something went wrong." })
+                                                }
+                                                else {
+                                                    res.send({ message: "ok" })
+                                                }
+                                            }
+                                        )
+                                    }
+                                    else {
+                                        res.send({ message: "Incorrect password." })
+                                    }
+                                })
+                            }
+
+                            else {
+                                res.send({ message: "Username not exists." })
+                            }
+                        })
+                }
+                else {
+                    res.send({ message: "Email already exists." })
+                }
+            }
+        )
+    }
+})
 
 app.post('/signin', (req, res) => {
     const username = req.body.username
@@ -178,7 +249,7 @@ app.post('/signin', (req, res) => {
             }
             if (result.length > 0) {
                 bcrypt.compare(password, result[0].password, (error, response) => {
-                    if(error)
+                    if (error)
                         console.log(error)
                     if (response) {
                         req.session.user = result;
@@ -195,6 +266,129 @@ app.post('/signin', (req, res) => {
                 res.send({
                     message: "User dosen't exist"
                 })
+            }
+        }
+    )
+})
+
+app.post('/updatePassword', (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+    const newPassword = req.body.newPassword
+
+    db.query(
+        "SELECT * FROM users WHERE username = ?;",
+        username,
+        (err, result) => {
+            if (err) {
+                res.send({ message: "something went wrong" })
+            }
+            if (result.length > 0) {
+                bcrypt.compare(password, result[0].password, (error, response) => {
+                    if (error)
+                        console.log(error)
+                    if (response) {
+                        bcrypt.hash(newPassword, saltRounds, (err, hash) => {
+                            if (err) {
+                                console.log(err)
+                            }
+                            db.query(
+                                "UPDATE users SET password = ? WHERE username = ?;",
+                                [hash, username],
+                                (err, result) => {
+                                    if (err) {
+                                        res.send({ message: "Something went wrong." })
+                                    }
+                                    else {
+                                        res.send({ message: "ok" })
+                                    }
+                                }
+                            )
+                        })
+                    }
+                    else {
+                        res.send({
+                            message: "wrong password!"
+                        })
+                    }
+                })
+            }
+            else {
+                res.send({
+                    message: "User dosen't exist"
+                })
+            }
+        }
+    )
+})
+
+app.post('/getUserData', (req, res) => {
+    const username = req.body.username
+    db.query(
+        "SELECT * FROM private_crosswords WHERE username = ?;",
+        username,
+        (err, result) => {
+            if (err) {
+                res.send({ message: "something went wrong" })
+            }
+            if (result.length > 0) {
+                res.send({message: "data", data : result})
+            }
+            else {
+                res.send({
+                    message: "no data"
+                })
+            }
+        }
+    )
+})
+
+app.post('/savePuzzle', (req, res) => {
+    const username = req.body.username
+    const name = req.body.name
+    const puzzle = JSON.stringify(req.body.data)
+    // console.log(username)
+
+    db.query(
+        "SELECT * FROM private_crosswords WHERE username = ? AND crossword = ?;",
+        [username, puzzle],
+        (err, result) => {
+            if (err) {
+                res.send({ message: "something went wrong" })
+            }
+            if (result.length === 0) {
+                db.query(
+                    "INSERT INTO private_crosswords (username, crossword, name) VALUES(?, ?, ?);",
+                    [username, puzzle, name],
+                    (err, result) => {
+                        if (err) {
+                            console.log(err)
+                            res.send({ message: "Something went wrong." })
+                        }
+                        else {
+                            res.send({ message: "saved" })
+                        }
+                    }
+                )
+            }
+            else {
+                res.send({ message: "already saved" })
+            }
+        })
+})
+
+app.post('/deleteCrossword', (req, res) => {
+    const id = req.body.id
+
+    db.query(
+        "DELETE FROM private_crosswords WHERE id = ?;",
+        id,
+        (err, result) => {
+            if (err) {
+                res.send({ message: "something went wrong" })
+            }
+            else {
+                res.send({ message: "deleted" })
             }
         }
     )
