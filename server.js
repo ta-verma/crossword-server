@@ -25,12 +25,7 @@ app.use(session({
     key: "userId",
     secret: "crossword",
     resave: false,
-<<<<<<< HEAD
     saveUninitialized: false,
-=======
-    proxy:true,
-    saveUninitialized: true,
->>>>>>> 57de1176bcaef97753d58fcb57a071a270efaf5f
     cookie: {
         expires: 24 * 60 * 60 * 1000
     },
