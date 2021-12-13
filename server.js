@@ -21,29 +21,15 @@ app.use(cors({
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }));
 
-// app.use(session({
-//     key: "userId",
-//     secret: "crossword",
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: {
-//         expires: 60 * 60 * 24,
-//     },
-// }))
-
 app.use(session({
-    name: "userId",
-    secret: "yryGGeugidx34otGDuSF5sD9R8g0Gü3r8",
+    key: "userId",
+    secret: "crossword",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
-        path: "/",
-        secure: true,
-        //domain: ".herokuapp.com", REMOVE THIS HELPED ME (I dont use a domain anymore)
-        httpOnly: true
-    }
-}));
-
+        expires: 24 * 60 * 60 * 1000
+    },
+}))
 
 const db = mysql.createConnection({
     user: "sql6445547",
@@ -161,12 +147,12 @@ app.post('/signup', (req, res) => {
         "SELECT * FROM users WHERE username = ?;",
         username,
         (err, result) => {
-            if (result.length === 0) {
+            if (result?.length === 0) {
                 db.query(
                     "SELECT * FROM users WHERE email = ?;",
                     email,
                     (err, result) => {
-                        if (result.length === 0) {
+                        if (result?.length === 0) {
                             bcrypt.hash(password, saltRounds, (err, hash) => {
                                 if (err) {
                                     console.log(err)
@@ -260,7 +246,7 @@ app.post('/signin', (req, res) => {
             if (err) {
                 res.send({ err: err })
             }
-            if (result.length > 0) {
+            if (result?.length > 0) {
                 bcrypt.compare(password, result[0].password, (error, response) => {
                     if (error)
                         console.log(error)
@@ -345,7 +331,7 @@ app.post('/getUserData', (req, res) => {
                 res.send({ message: "something went wrong" })
             }
             if (result.length > 0) {
-                res.send({message: "data", data : result})
+                res.send({ message: "data", data: result })
             }
             else {
                 res.send({
@@ -418,7 +404,7 @@ app.get("/signin", (req, res) => {
 app.post("/generate", (req, res) => {
     const wordList = req.body.wordList
     // console.log(wordList)
-    if (wordList.length > 0) {
+    if (wordList?.length > 0) {
         const result = crossword.Crossword(wordList)
         // console.log(result)
         res.send({ result: result })
