@@ -1,39 +1,60 @@
 var data = [
-    ["benkelly", 'Broke football color barrier'],
-    ["mayer", "Broke football color barrier"],
-    ["houstonharte", "Award winning University Center"],
-    ["rambouillet", "Dominic’s breed"],
-    ["frisbee", "Join this “ultimate” campus team"],
-    ["softball", "Women pitched their way to World Series runner up"],
-    ["bonfire", "Toastiest homecoming tradition"],
-    ["texas", "Greatest state in the country"],
-    ["dominic", "4-legged mascot"],
-    ["black", "Original school colors: ___ & gold"],
-    ["sajc", "Original initials for the school"],
-    ["anglers", "Champion bass fishers"],
-    ["rugby", "Back to back state champs in this intramural sport"],
-    ["gumtree", "Stickiest spot on campus"],
-    ["oak", "Tree lighting grove"],
-    ["javelin", "2017 National champion in this track & field sport"],
-    ["volleyball", "Spiked a spot in the Elite 8"],
-    ["basketball", "Dribbled to Elite 8"],
-    ["here", "From ___, it’s possible"],
-    ["hunter", "Newest academic building: ___ Strain"],
-    ["may", "April showers bring this Dr’s Flowers"],
-    ["mechanical", "New engineering degree on campus in 2018"],
-    ["gold", "Not silver but ___"],
-    ["legrand", "Football’s home"],
-    ["roscoe", "Fuzzy horned mascot"],
-    ["ramjam", "Not ram jelly but ___"],
-    ["bella", "She gets all women’s teams ramped up"],
-    ["blue", "We are True ___"],
-    ["library", "Celebrating 50 years on campus"],
-    ["carr", "Oldest residence hall on campus"],
-    ["archer", "New College of Health and Human Services Building"],
-    ["ramfam", "Brothers & sisters, faculty & staff"],
-    ["tennis", "Newest women’s sport"],
-    ["mall", "Not for shopping but walking"]
+    ["Humorous", 'What bone has a sense of humor?'],
+    ["Crabapple", "What kind of apple has a short temper?"],
+    ["Laughing", "Rolling on floor"],
+    ["vitamin", "These minerals are vital to your health"],
+    ["Telephone", "What has a ring, but no finger?"],
+    ["spaceball", "What is an aliens favourite sport?"],
+    ["Ghost", "Casper was a friendly one and Demi Moore made a clay pot with one."],
+    ["Jelly", "Santa's abdomen shakes like a bowl full of this."],
+    ["Pick", "	You can do this with your friends. You can do this with your nose. But don't do it with your friend's nose!"],
+    ["Baseball", "	Where everyone wants to run home and stealing is encouraged."],
+    ["Showers", "	Brings you May flowers."],
+    ["Superhero", "	Special abilities and brightly colored underwear are all you need to be one of these."],
+    ["Teeth", "	Consuming food would be pretty tough without these chompers."],
+    ["Lemonade", "	Often sold by child entrepreneurs in the summer."],
+    ["Meteor", "	A shower that lights up the sky."],
+    ["Bikini", "	The itsy bitsy teeny weeny yellow polka dot variety is quite popular."],
+    ["Solo", "	Surname of the pilot of the Millennium Falcon."],
+    ["Lobe", "	Where jewelry pierces your head."],
+    ["Reverse", "	If you blow past your destination, you'll have to throw your car into this."],
+    ["Gorilla", "	These animals hang out in the mist."],
+    ["Sandwich", "	Rueben and Monte Cristo are two delicious varieties of this."],
+    ["Burp", "	Air that is expelled orally."],
+    ["Comet", "	Describes a toilet cleaner as well as one of Santa's reindeer."],
+    ["Terrible", "	Two year-old children who throw tantrums get this nickname. So did the tsar Ivan."],
+    ["Waddle", "	The signature stroll of ducks and penguins."],
+    ["Pregnant", "	The state of holding a person in your person."],
+    ["Spine", "	This is needed both for courage and hardcover books."],
+    ["Twilight", "	Between daylight and darkness when sparkling blood suckers like to come out."],
+    ["BaldSpot", "	Responsible for the toupee industry."],
+    ["Century", "	Longer than a decade and shorter than a millennium."],
+    ["Charcoal", "	Fuels backyard get-togethers."],
+    ["Smokey", "	Only you can prevent forest fires."],
+    ["Doubt", "	A defendant will go free if a reasonable amount of this exists."],
+    ["Japan", "	Godzilla calls this place home."],
+    ["Saloon	", "This would be a good place to find Can-Can girls and drunk Cowboys."],
+    ["Jingle", "	Santa's reindeer make this noise."],
+    ["Tarzan", "	He prefers to travel on vines and pal around with gorillas."],
+    ["Microsoft", "	This company makes billions of dollars selling Windows."],
+    ["Triangle", "	A caribbean shape that makes ships disappear."],
+    ["Penguins", "	Known for their natural tuxedos and marching."],
+    ["Library", "	Before Google, we actually had to physically look things up in this building full of knowledge."],
+    ["Lungs", "	They transfer oxygen from the atmosphere into blood."],
+    ["Ravens", "	Dark, feathery, and popular in Baltimore."],
+    ["Xray", "	Use this machine if you really want to see inside somone."],
+    ["DeadSea", "	A morbidly-named body of water."],
+    ["Wing", "	Angels and pilots earn these."],
+    ["Fragile", "	Boxes marked as this should not be abused."],
+    ["Hump", "By Thursday you're over this."],
+    ["Juggling", "One of the few activities that involves bowling pins flying through the air."],
+    ["Season", "Flavors your food and divides the year up."],
+    ["Snickers", "A candy whose name is reminiscent of a small laugh."],
+    ["Goose", "This creature travels in a gaggle."],
+    ["Laugh", "The L in Lol"],
+    ["mall", "Not for shopping but walking"],
 ]
+
 
 const shuffled = data.sort(() => 0.5 - Math.random());
 let selected = shuffled.slice(0, Math.random() * (shuffled.length - 5) + 5);
@@ -52,11 +73,13 @@ module.exports = {
 
         function grid(posArr, wrd) {
             const charIdx = charMap(posArr)
+            // console.log(charIdx)
             if (!wrd) return output(posArr)
             const next = getIdx({
                 wrd,
                 charIdx: charIdx
             })
+            // console.log(next)
             if (next.length) {
                 const words = shuffleWords(next)
                 const nextWord = word_list.pop()
@@ -213,7 +236,4 @@ module.exports = {
             return [...words].sort((pre, nex) => pre.length - nex.length)
         }
     }
-
-
-
 }

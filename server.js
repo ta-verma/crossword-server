@@ -4,7 +4,7 @@ const cors = require("cors")
 const bcrypt = require("bcrypt")
 const cookieParser = require("cookie-parser")
 const session = require("express-session");
-const crossword = require("./create");
+const crossword = require("./helpers/create");
 
 const saltRounds = 10
 
@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: ["https://cross-quest.herokuapp.com", "http://localhost:3000"],
+    origin: ["https://cross-quest.herokuapp.com", "http://localhost:3000", "https://crossword-plum.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -37,6 +37,13 @@ const db = mysql.createConnection({
     password: "gTWpLJuTvB",
     database: "sql6445547"
 });
+
+// setInterval(() => {
+//     db.query('select 1')
+//     console.log("ping successful")
+// }, 1000 * 60 * 3) // every 3 minutes
+
+// SELECT CONVERT_TZ(CURRENT_TIMESTAMP,'+00:00','+05:59')
 
 app.post('/oauthsignup', (req, res) => {
     const id = req.body.id
