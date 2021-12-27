@@ -89,7 +89,7 @@ app.post('/save', (req, res) => {
         [data],
         (err, result) => {
             if (err)
-                res.send({ message: "Something went wrong.1" })
+                res.send({ message: "Something went wrong" })
             else if (result.length === 0) {
                 db.query(
                     `INSERT INTO public_crosswords (crossword) VALUES(?);`,
@@ -111,6 +111,46 @@ app.post('/save', (req, res) => {
         }
     )
 })
+
+app.post('/createContest', (req, res) => {
+    const contest_name = req.body.contest_name
+    const username = req.body.username
+    const description = req.body.description
+    const start_time = req.body.start_time
+    const end_time = req.body.end_time
+
+    // convert local time to UTC
+    const start_time_utc = new Date(start_time).toISOString().slice(0, 19).replace('T', ' ')
+    const end_time_utc = new Date(end_time).toISOString().slice(0, 19).replace('T', ' ')
+   
+    db.query(
+        "SELECT * FROM contest WHERE contest_name = ?",
+        [contest_name],
+        (err, result) => {
+            if (err)
+                res.send({ message: "Something went wrong.1" })
+            else if (result.length === 0) {
+                db.query(
+                    `INSERT INTO contest (contest_name, username, description, start_time, end_time) VALUES(?, ?, ?, ?, ?);`,
+                    [contest_name, username, description, start_time_utc, end_time_utc],
+                    (err, result) => {
+                        if (err) {
+                            console.log(err)
+                            res.send({ message: "Something went wrong." })
+                        }
+                        else
+                            res.send({ message: "ok", name: contest_name })
+                    }
+                )
+            }
+            else {
+                res.send({ message: "Contest Name Already Exists" })
+            }
+
+        }
+    )
+})
+
 
 app.post('/togglePrivacy', (req, res) => {
     const id = req.body.id
@@ -356,8 +396,8 @@ app.post('/savePuzzle', (req, res) => {
     // console.log(username)
 
     db.query(
-        "SELECT * FROM private_crosswords WHERE username = ? AND crossword = ?;",
-        [username, puzzle],
+        "SELECT * FROM private_crosswords WHERE username = ? AND crossword = ? AND name = ?;",
+        [username, puzzle, name],
         (err, result) => {
             if (err) {
                 res.send({ message: "something went wrong" })
